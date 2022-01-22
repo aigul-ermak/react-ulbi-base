@@ -5,6 +5,7 @@ import './style/App.css';
 import {PostList} from './components/PostList';
 import {MyButton} from './components/UI/button/MyButton';
 import {MyInput} from './components/UI/input/MyInput';
+import {PostForm} from './components/PostForm';
 
 
 function App() {
@@ -14,38 +15,24 @@ function App() {
         {id: 3, title: 'Typescript', body: 'Description'}
     ])
 
-    // const [title, setTitle] = useState('')
-    // const [body, setBody] = useState('')
-    const [post, setPost] = useState({title: '', body: ''})
-
-    const addNewPost = (e) => {
-        e.preventDefault()
-        setPosts([...posts, {...post, id:Date.now()}])
-        setPost({title: '', body: ''})
-
-        // console.log(bodyInputRef.current.value)
+    const createPost = (newPost) => {
+        setPosts([...posts, newPost])
     }
-    // const bodyInputRef = useRef();
+
+    const removePost = (post) => {
+        setPosts(posts.filter(p => p.id !== post.id))
+    }
 
     return (
         <div className="App">
-            <form>
-                <MyInput
-                    value={post.title}
-                    onChange={e => setPost({...post, title: e.target.value})}
-                    type="text"
-                    placeholder="Name of text"/>
-                <MyInput
-                    // ref={bodyInputRef}
-                    value={post.body}
-                    onChange={e => setPost({...post, body: e.target.value})}
-                    type="text"
-                    placeholder="Description of text"/>
-                <MyButton
-                    onClick={addNewPost}>Create post</MyButton>
-            </form>
+            <PostForm create={createPost}/>
+            {posts.length !== 0
+            ? <PostList posts={posts}
+                        title="About Js"
+                        remove={removePost}/>
+            : <h1 style={{textAlign: 'center'}}>No posts</h1>
+            }
 
-            <PostList posts={posts} title="About Js"/>
 
         </div>
     );
