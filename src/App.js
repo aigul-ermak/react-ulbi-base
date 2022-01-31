@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react'
+import React, {useMemo, useRef, useState} from 'react'
 import {PostItem} from './components/PostItem';
 
 import './style/App.css';
@@ -17,6 +17,23 @@ function App() {
     ])
 
     const [selectedSort, setSelectedSort] = useState('')
+    const [searchQuery, setSearchQuery] = useState('')
+
+    // function getSortedPost() {
+    //
+    // }
+    const sortedPosts = useMemo(() => {
+        console.log("getSortedPost has done")
+        if (selectedSort) {
+            return [...posts].sort((a, b) => a[selectedSort].localeCompare(b[selectedSort]))
+        }
+        return posts
+    }, [selectedSort, posts])
+
+    const sortedAndSearchedPosts = useMemo(() => {
+        return sortedPosts.filter(post => post.title.toLowerCase().includes(searchQuery))
+    }, [searchQuery, sortedPosts])
+
 
     const createPost = (newPost) => {
         setPosts([...posts, newPost])
@@ -27,7 +44,6 @@ function App() {
     }
     const sortPosts = (sort) => {
         setSelectedSort(sort)
-        setPosts([...posts].sort((a,b) => a[sort].localeCompare(b[sort])))
     }
 
     return (
@@ -35,6 +51,10 @@ function App() {
             <PostForm create={createPost}/>
             <hr style={{margin: '15px 0'}}/>
             <div>
+                <MyInput
+                    placeholder='Search...'
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}/>
                 <MySelect
                     defaultValue='Sorted value'
                     value={selectedSort}
@@ -44,8 +64,8 @@ function App() {
                         {value: 'body', name: 'By description'}]
                     }/>
             </div>
-            {posts.length !== 0
-                ? <PostList posts={posts}
+            {sortedAndSearchedPosts.length !== 0
+                ? <PostList posts={sortedAndSearchedPosts}
                             title="About Js"
                             remove={removePost}/>
                 : <h1 style={{textAlign: 'center'}}>No posts</h1>
