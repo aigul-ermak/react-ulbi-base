@@ -8,6 +8,7 @@ import {MyInput} from './components/UI/input/MyInput';
 import {PostForm} from './components/PostForm';
 import {MySelect} from './components/UI/select/MySelect';
 import {PostFilter} from './components/PostFilter';
+import {MyModal} from './components/MyModal/MyModal';
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
     // const [searchQuery, setSearchQuery] = useState('')search
 
     const [filter, setFilter] = useState({sort: '', query: ''})
+    const[modal, setModal] = useState(false)
 
 
     const sortedPosts = useMemo(() => {
@@ -38,21 +40,23 @@ function App() {
 
     const createPost = (newPost) => {
         setPosts([...posts, newPost])
+        setModal(false)
     }
 
     const removePost = (post) => {
         setPosts(posts.filter(p => p.id !== post.id))
     }
 
-    // const sortPosts = (sort) => {
-    //     setSelectedSort(sort)
-    // }
 
     return (
         <div className="App">
-            <PostForm create={createPost}/>
+            {/*<PostForm create={createPost}/>*/}
             <hr style={{margin: '15px 0'}}/>
             <div>
+                <button style={{}} onClick={() => setModal(true)}>Add post</button>
+                <MyModal visible={modal} setVisible={setModal}>
+                    <PostForm create={createPost}/>
+                </MyModal>
                 <PostFilter filter={filter} setFilter={setFilter}/>
                 {/*<MyInput*/}
                 {/*    placeholder='Search...'*/}
