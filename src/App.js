@@ -1,56 +1,49 @@
-import React, {useMemo, useRef, useState} from 'react'
-import {PostItem} from './components/PostItem';
+import React, {useEffect, useState} from 'react'
 
 import './style/App.css';
 import {PostList} from './components/PostList';
-import {MyButton} from './components/UI/button/MyButton';
-import {MyInput} from './components/UI/input/MyInput';
 import {PostForm} from './components/PostForm';
-import {MySelect} from './components/UI/select/MySelect';
 import {PostFilter} from './components/PostFilter';
 import {MyModal} from './components/MyModal/MyModal';
+import {usePosts} from './hooks/usePosts';
+import axios from 'axios';
+import PostService from './API/PostService';
 
 
 function App() {
-    const [posts, setPosts] = useState([
-        {id: 1, title: 'JS', body: 'Description'},
-        {id: 2, title: 'Areact', body: 'Description'},
-        {id: 3, title: 'Typescript', body: 'Description'}
-    ])
-
-    // const [selectedSort, setSelectedSort] = useState('') sort
-    // const [searchQuery, setSearchQuery] = useState('')search
-
-    const [filter, setFilter] = useState({sort: '', query: ''})
-    const[modal, setModal] = useState(false)
+    const [posts, setPosts] = useState([])
+    const [filter, setFilter] = useState({sort: '', query: ''});
+    const [modal, setModal] = useState(false);
+    const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
+    const [isPostLoading, setIsPostLoading] = useState(false);
 
 
-    const sortedPosts = useMemo(() => {
-        console.log("getSortedPost has done")
-        if (filter.sort) {
-            return [...posts].sort((a, b) => a[filter.sort].localeCompare(b[filter.sort]))
-        }
-        return posts
-    }, [filter.sort, posts])
-
-    const sortedAndSearchedPosts = useMemo(() => {
-        return sortedPosts.filter(post => post.title.toLowerCase().includes(filter.query))
-    }, [filter.query, sortedPosts])
-
+    useEffect(() => {
+        fetchPosts();
+    }, [])
 
     const createPost = (newPost) => {
         setPosts([...posts, newPost])
         setModal(false)
     }
 
+    async function fetchPosts() {
+        setIsPostLoading(true)
+        setTimeout(async () => {
+            const posts = await PostService.getAll();
+            setPosts(posts)
+            setIsPostLoading(false)
+        }, 1000)
+    }
+
+
     const removePost = (post) => {
         setPosts(posts.filter(p => p.id !== post.id))
     }
 
-
     return (
         <div className="App">
-            {/*<PostForm create={createPost}/>*/}
+            <button onClick={fetchPosts}>get data</button>
             <hr style={{margin: '15px 0'}}/>
             <div>
                 <button style={{}} onClick={() => setModal(true)}>Add post</button>
@@ -58,31 +51,14 @@ function App() {
                     <PostForm create={createPost}/>
                 </MyModal>
                 <PostFilter filter={filter} setFilter={setFilter}/>
-                {/*<MyInput*/}
-                {/*    placeholder='Search...'*/}
-                {/*    value={searchQuery}*/}
-                {/*    onChange={(e) => setSearchQuery(e.target.value)}/>*/}
-                {/*<MySelect*/}
-                {/*    defaultValue='Sorted value'*/}
-                {/*    value={selectedSort}*/}
-                {/*    onChange={sortPosts}*/}
-                {/*    options={[*/}
-                {/*        {value: 'title', name: 'By name'},*/}
-                {/*        {value: 'body', name: 'By description'}]*/}
-                {/*    }/>*/}
+                {isPostLoading
+                    ? <h1>Loading...</h1>
+                    : <PostList posts={sortedAndSearchedPosts}
+                                title="About Js"
+                                remove={removePost}/>}
             </div>
-            <PostList posts={sortedAndSearchedPosts}
-                      title="About Js"
-                      remove={removePost}/>
-
-            {/*{sortedAndSearchedPosts.length !== 0*/}
-            {/*    ? <PostList posts={sortedAndSearchedPosts}*/}
-            {/*                title="About Js"*/}
-            {/*                remove={removePost}/>*/}
-            {/*    : <h1 style={{textAlign: 'center'}}>No posts</h1>*/}
-            {/*}*/}
-
         </div>
+
     );
 }
 
